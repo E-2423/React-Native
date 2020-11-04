@@ -53,9 +53,8 @@ const topics = [
 ];
 
 const Introduction =(props)=>{
-
   function selectedLanguage(lang){
-    props.navigation.navigate("Jobs", {selectedLanguage:lang})
+    props.navigation.navigate('Jobs', {selectedLanguage:lang});
   }
    return (
       <SafeAreaView style={{flex:1}}>
