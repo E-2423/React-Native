@@ -1,7 +1,8 @@
 import Axios from 'axios';
 import Modal from 'react-native-modal';
 import React, {useState, useEffect} from 'react';
-import {SafeAreaView, Text, View, FlatList, Button} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {SafeAreaView, Text, View, FlatList, Button, TouchableOpacity} from 'react-native';
 
 import {jobs} from '../styles'
 import {JobItem} from '../components';
@@ -29,17 +30,41 @@ const Jobs = (props) => {
 
   }
 
-  const renderJobs = ({item}) => <JobItem job={item} onSelect={()=> onJobSelect(item)}/>;
+  const renderJobs = ({item}) => 
+    <JobItem job={item} onSelect={()=> onJobSelect(item)}/>;
+
+  const onJobSave = async()=>{
+    let savedJobList = await AsyncStorage.getItem("@SAVED_JOBS");
+    savedJobList= savedJobList==null ? [] : JSON.parse(savedJobList)
+
+    const updatedJobList = [...savedJobList, selectedJob];
+
+    await AsyncStorage.setItem("@SAVED_JOBS", JSON.stringify(updatedJobList));
+  }
 
   return (
-    <SafeAreaView>
-      <View>
+    <SafeAreaView style={{flex:1}}>
+      <View style={{flex:1}}>
       <Text style={{
         textAlign: 'center', 
         fontWeight: 'bold',
         fontSize: 20
       }}>JOBS FOR {selectedLanguage.toUpperCase()}</Text>
         <FlatList data={data} renderItem={renderJobs} />
+        <TouchableOpacity
+          style={{
+            backgroundColor:'blue',
+            padding:10,
+            borderRadius:10,
+            position:'absolute',
+            bottom:10,
+            right:10
+          }}
+          onPress={()=>props.navigation.navigate("SavedJobs")}
+        >
+          <Text style={{color:'white'}}>Kayıtlıları Gör</Text>
+        </TouchableOpacity>
+
         <Modal isVisible={modalFlag} onBackdropPress={()=>setModalFlag(false)}>
           <View style={jobs.modalBackground}>
             <View style={{borderBottomWidth:2, borderColor:'#bdbdbd'}}>
@@ -51,7 +76,7 @@ const Jobs = (props) => {
               <Text numberOfLines={5}>{selectedJob.description}</Text>
             </View>
             <Button
-              title='Kaydet' onPress={()=> null}
+              title='Kaydet' onPress={onJobSave}
             />
           </View>
         </Modal>
